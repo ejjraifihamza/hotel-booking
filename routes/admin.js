@@ -1,5 +1,9 @@
 const router = require("express").Router();
 
+const Hotel = require("../model/hotel");
+const Customer = require("../model/customer");
+const Owner = require("../model/owner");
+
 // Admin can create and edit, delete Hotels. Add images for each hotel. Each hotel can have between 4 and 8 images.
 router.get("/", (req, res) => {
   res.redirect("/hotels");

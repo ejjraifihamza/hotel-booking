@@ -26,4 +26,4 @@ const ownerSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Owner", userSchema);
+module.exports = mongoose.model("Owner", ownerSchema);
