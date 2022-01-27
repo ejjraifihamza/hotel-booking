@@ -16,7 +16,7 @@ app.use(express.json());
 app.use("/", adminRouter);
 
 app.use(function (error, req, res, next) {
-  res.render("500");
+  res.send("Oop something goes wrong!");
 });
 
 connect()
