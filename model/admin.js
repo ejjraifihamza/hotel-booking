@@ -24,10 +24,6 @@ const adminSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  isAdmin: {
-    type: Boolean,
-    default: true,
-  },
 });
 
 module.exports = mongoose.model("Admin", adminSchema);
