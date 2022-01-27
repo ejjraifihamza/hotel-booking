@@ -24,10 +24,6 @@ const clientSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  isClient: {
-    type: Boolean,
-    default: true,
-  },
 });
 
 module.exports = mongoose.model("Client", clientSchema);
