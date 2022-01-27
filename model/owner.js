@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const ownerSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -24,10 +24,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  isOwner: {
-    type: Boolean,
-    default: true,
-  },
 });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("Owner", userSchema);
