@@ -51,24 +51,76 @@ router.delete("/customer/:id/delete", (req, res) => {
 });
 
 // CRUD for owners registered on the site.
-router.get("/owners", (req, res) => {
-  res.send("owners page");
+router.get("/owners", async (req, res) => {
+  try {
+    const owner = await Owner.find({})
+      .catch(err => {
+        console.error(err);
+      })
+    res.status(200).send(owner)
+  } catch (error) {
+    console.error(error);
+  }
 });
 
-router.post("/add-owner", (req, res) => {
-  res.send("add owner form");
+router.post("/add-owner", async (req, res) => {
+  const owner = new Owner({
+    name: req.body.name,
+    email: req.body.email,
+    password: req.body.password,
+    date: req.body.date
+  })
+  try {
+    const result = await owner.save()
+      .catch(err => {
+        throw err
+      })
+    res.send(result)
+  } catch (error) {
+    console.error(error);
+  }
 });
 
-router.get("/owner/:id", (req, res) => {
-  res.send("view owner page");
+router.get("/owner/:id", async (req, res) => {
+  const id = req.params.id
+  try {
+    const owner = await Owner.findById(id)
+      .catch((err) => {
+        throw err
+      })
+    res.status(200).send(owner)
+  } catch (error) {
+    console.log(error);
+  }
 });
 
-router.patch("/owner/:id/update", (req, res) => {
-  res.send("update owner page");
+router.patch("/owner/:id/update", async (req, res) => {
+  const ownerId = req.params.id
+  const {
+    name,
+    email,
+    password
+  } = req.body
+  const updatedOwner = await Owner.findByIdAndUpdate(ownerId, {
+    name: name,
+    email: email,
+    password: password
+  })
+  if (!updatedOwner) return res.status(400).send('Owner does not updated!')
+  res.status(200).send('Owner updated successfully!')
 });
 
-router.delete("/owner/:id/delete", (req, res) => {
-  res.send("delete owner");
+router.delete("/owner/:id/delete", async (req, res) => {
+  const id = req.params.id
+  try {
+    const owner = await Owner.findByIdAndRemove(id)
+      .catch(err => {
+        console.error(err);
+      })
+    res.status(200).json('Your Owner has been removed successfully')
+  } catch (error) {
+    console.error(error)
+  }
 });
 
 module.exports = router;
