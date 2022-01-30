@@ -20,6 +20,7 @@ const hotelSchema = new mongoose.Schema({
   },
   imagesPath: {
     type: Array,
+    required: true,
   },
   date: {
     type: Date,

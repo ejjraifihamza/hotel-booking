@@ -1,14 +1,18 @@
-let fs = require("fs");
-const path = require("path");
 const router = require("express").Router();
 const mongodb = require("mongodb");
+const bcrypt = require("bcryptjs");
 const multer = require("multer");
-
-const ObjectId = mongodb.ObjectId;
 
 const Hotel = require("../model/hotel");
 const Customer = require("../model/customer");
 const Owner = require("../model/owner");
+
+const ownerSchemaValidation = require("../validation/ownerInputValidation");
+const customerSchemaValidation = require("../validation/customerInputValidation");
+const hotelSchemaValidation = require("../validation/hotelInputValidation");
+const deleteFile = require("../utils/deleteFile");
+
+const ObjectId = mongodb.ObjectId;
 
 const storageConfig = multer.diskStorage({
   destination: (req, res, cb) => {
@@ -32,7 +36,26 @@ router.get("/hotels", async (req, res) => {
   res.status(200).send(hotels);
 });
 
-router.post("/add-hotel", upload.array("photos", 12), async (req, res) => {
+router.post("/add-hotel", upload.array("photos", 20), async (req, res) => {
+  if (req.files.length < 4 || req.files.length > 8) {
+    const unwantedUploadedImages = req.files;
+    deleteFile.deleteFile(unwantedUploadedImages);
+    return res
+      .status(400)
+      .send("Please Choose Between 4 And 8 Photos For Each Hotel!");
+  }
+  const { error } = hotelSchemaValidation.addHotelValidation(req.body);
+  if (error) {
+    const unwantedUploadedImages = req.files;
+    deleteFile.deleteFile(unwantedUploadedImages);
+    return res.status(400).send(error.details[0].message);
+  }
+  const existHotel = await Hotel.find({ name: req.body.name });
+  if (existHotel.length > 0) {
+    const unwantedUploadedImages = req.files;
+    deleteFile.deleteFile(unwantedUploadedImages);
+    return res.status(400).send("Hotel With Given Name Is Already Exist!");
+  }
   const uploadedImageFiles = req.files;
   let images = [];
   for (const uploadedImageFile of uploadedImageFiles) {
@@ -67,13 +90,7 @@ router.patch(
     if (!hotel)
       return res.status(400).send("Sorry We Can Not Find Hotel With Given Id!");
     let hotelImages = hotel.imagesPath;
-    console.log(hotelImages);
-    for (const hotelImage of hotelImages) {
-      fs.unlink(`../hotel-booking/images/${hotelImage}`, (err) => {
-        if (err) throw err;
-        console.log("Files Deleted!");
-      });
-    }
+    deleteFile.deleteExistingFile(hotelImages);
     const uploadedImageFiles = req.files;
     let images = [];
     for (const uploadedImageFile of uploadedImageFiles) {
@@ -95,6 +112,8 @@ router.delete("/hotel/:id/delete", async (req, res) => {
   if (!hotel)
     return res.status(400).send("Sorry We Can Not Find Hotel With Given Id!");
   await Hotel.deleteOne({ _id: hotelId });
+  let hotelImages = hotel.imagesPath;
+  deleteFile.deleteExistingFile(hotelImages);
   res.status(200).send("delete hotel");
 });
 
@@ -105,15 +124,18 @@ router.get("/customers", async (req, res) => {
 });
 
 router.post("/add-customer", async (req, res) => {
-  const { name, email, password } = req.body;
-  const client = new Customer({
+  const { error } = customerSchemaValidation.registerValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  const { name, email } = req.body;
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const customer = new Customer({
     name: name,
     email: email,
-    password: password,
+    password: hashedPassword,
   });
   try {
-    await client.save();
-    return res.status(200).send("client created suc");
+    await customer.save();
+    return res.status(200).send(customer);
   } catch (error) {
     res.status(400).send(error);
   }
@@ -128,11 +150,12 @@ router.get("/customer/:id", async (req, res) => {
 
 router.patch("/customer/:id/update", async (req, res) => {
   const id = new ObjectId(req.params.id);
-  const { name, email, password } = req.body;
+  const { name, email } = req.body;
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const newCustomer = {
     name: name,
     email: email,
-    password: password,
+    password: hashedPassword,
   };
 
   const client = await Customer.findOne({ _id: new ObjectId(id) });
@@ -164,11 +187,13 @@ router.get("/owners", async (req, res) => {
 });
 
 router.post("/add-owner", async (req, res) => {
+  const { error } = ownerSchemaValidation.registerValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const owner = new Owner({
     name: req.body.name,
     email: req.body.email,
-    password: req.body.password,
-    date: req.body.date,
+    password: hashedPassword,
   });
   try {
     const result = await owner.save().catch((err) => {
@@ -194,11 +219,12 @@ router.get("/owner/:id", async (req, res) => {
 
 router.patch("/owner/:id/update", async (req, res) => {
   const ownerId = req.params.id;
-  const { name, email, password } = req.body;
+  const { name, email } = req.body;
+  const hashedPassword = await bcrypt.hash(req.body.password, 10);
   const updatedOwner = await Owner.findByIdAndUpdate(ownerId, {
     name: name,
     email: email,
-    password: password,
+    password: hashedPassword,
   });
   if (!updatedOwner) return res.status(400).send("Owner does not updated!");
   res.status(200).send("Owner updated successfully!");
