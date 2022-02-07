@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 async function connect() {
-  await mongoose.connect('mongodb://localhost:27017/hotel-booking');
+  await mongoose.connect(process.env.DB_CONNECT);
 }
 
 module.exports = connect;
