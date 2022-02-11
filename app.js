@@ -4,6 +4,7 @@ const express = require("express");
 const connect = require("./connection/connect");
 const adminRouter = require("./routes/admin");
 const ownerRouter = require("./routes/owner");
+const customerRouter = require("./routes/customer");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use("/", adminRouter);
 app.use("/", ownerRouter);
+app.use("/", customerRouter);
 
 app.use(function (error, req, res, next) {
   res.send("Oop something goes wrong!");

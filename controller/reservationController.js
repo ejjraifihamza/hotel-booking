@@ -8,9 +8,9 @@ const createReservation = async (req, res) => {
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
-  const { owner_id, room_id, payment_type, date_from, date_to } = req.body;
+  const { reserver_id, room_id, payment_type, date_from, date_to } = req.body;
   const reservation = new Reservation({
-    owner_id,
+    reserver_id,
     room_id,
     payment_type,
     date_from,
@@ -31,6 +31,27 @@ const createReservation = async (req, res) => {
   }
 };
 
+const deleteReservation = async (req, res) => {
+  const reservationId = req.body.reservation_id;
+  const roomId = req.body.room_id;
+  try {
+    const updateRoom = await Room.findByIdAndUpdate(roomId, {
+      status: "disponible",
+    });
+    if (!updateRoom)
+      return res.status(400).send("Room status does not change!");
+    const deletedReservation = await Reservation.findByIdAndDelete(
+      reservationId
+    );
+    if (!deletedReservation)
+      return res.status(400).send("reservation does not deleted!");
+    res.status(200).send("Reservation deleted successfully!");
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
 module.exports = {
   createReservation: createReservation,
+  deleteReservation: deleteReservation,
 };

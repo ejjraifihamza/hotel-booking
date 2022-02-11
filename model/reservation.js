@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const reservationSchema = new mongoose.Schema({
-  owner_id: {
+  reserver_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Owner",
   },
