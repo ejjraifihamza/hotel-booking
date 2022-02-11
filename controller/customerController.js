@@ -47,9 +47,9 @@ exports.updateOneCustomer = async (req, res) => {
   };
 
   const client = await Customer.findOne({ _id: new ObjectId(id) });
-  if (!client) return res.send("Client not found");
+  if (!client) return res.send("Customer not found");
   const updateClient = await Customer.updateOne({ _id: id }, newCustomer);
-  if (updateClient) return res.send("user updated successfully!");
+  if (updateClient) return res.send("Customer updated successfully!");
   res.send("somthing goes wrong");
 };
 
