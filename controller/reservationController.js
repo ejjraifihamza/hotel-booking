@@ -1,4 +1,5 @@
 const Reservation = require("../model/reservation");
+const Room = require("../model/room");
 
 const reservationValidation = require("../validation/reservationInput");
 
@@ -20,6 +21,10 @@ const createReservation = async (req, res) => {
       return res.send('"type" should be "card" or "cash"!');
     }
     await reservation.save();
+    const room = await Room.findByIdAndUpdate(room_id, {
+      status: "pas disponible",
+    });
+    if (!room) return res.status(500).send("Room status does not change!");
     return res.status(200).send(reservation);
   } catch (error) {
     res.status(400).send(error);

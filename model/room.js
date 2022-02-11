@@ -22,6 +22,10 @@ const Room = mongoose.model(
       type: String,
       required: true,
     },
+    status: {
+      type: String,
+      default: "disponible",
+    },
     date: {
       type: Date,
       default: Date.now,
