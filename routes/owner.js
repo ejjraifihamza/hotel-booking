@@ -28,6 +28,9 @@ router
   .route("/owner-hotel/:id/update")
   .patch(upload.array("photos", 20), hotelController.updateOneHotel);
 router.route("/owner-hotel/:id/delete").delete(hotelController.deleteOneHotel);
+//! get hotels by room status..
+
+router.route('/owner-hotels-status').get(hotelController.getAllHotelsByStatus);
 
 // ! Owner can create a room and update, delete it
 
