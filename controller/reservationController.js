@@ -23,6 +23,7 @@ const createReservation = async (req, res) => {
     await reservation.save();
     const room = await Room.findByIdAndUpdate(room_id, {
       status: "pas disponible",
+      availableDate: date_to,
     });
     if (!room) return res.status(500).send("Room status does not change!");
     return res.status(200).send(reservation);
