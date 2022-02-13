@@ -1,6 +1,8 @@
 const Room = require("../model/room");
+const Hotel = require("../model/hotel");
 const roomValidation = require("../validation/roomInputValidation");
 const deleteFile = require("../utils/deleteRoomFile");
+const { isIsoDate } = require("@hapi/joi/lib/common");
 
 const getAll_rooms = async (req, res) => {
   const rooms = await Room.find();
@@ -94,10 +96,22 @@ const removeOne_room = async (req, res) => {
   res.status(200).send("😜 your room has been deleted");
 };
 
+const searchForAvailableRoomByDate = async (req, res) => {
+  const { date_one, date_two } = req.query;
+  const availabeRooms = {
+    alreadyAvailable: await Room.find({ availableDate: null }),
+    willBeAvailable: await Room.find({
+      availableDate: { $gte: new Date(date_one), $lte: new Date(date_two) },
+    }),
+  };
+  res.json({ message: availabeRooms });
+};
+
 module.exports = {
   getAll_rooms,
   getOne_room,
   add_room,
   update_room,
   removeOne_room,
+  searchForAvailableRoomByDate,
 };

@@ -13,10 +13,10 @@ const reservationSchema = new mongoose.Schema({
     type: String,
   },
   date_from: {
-    type: String,
+    type: Date,
   },
   date_to: {
-    type: String,
+    type: Date,
   },
 });
 
