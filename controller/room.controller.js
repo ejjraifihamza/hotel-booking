@@ -2,10 +2,24 @@ const Room = require("../model/room");
 const Hotel = require("../model/hotel");
 const roomValidation = require("../validation/roomInputValidation");
 const deleteFile = require("../utils/deleteRoomFile");
-const { isIsoDate } = require("@hapi/joi/lib/common");
+const {
+  isIsoDate
+} = require("@hapi/joi/lib/common");
 
 const getAll_rooms = async (req, res) => {
   const rooms = await Room.find();
+  if (!rooms) {
+    return res.status(400).send("😒 Sorry We can't find any rooms");
+  }
+  res.status(200).send(rooms);
+};
+
+const getAll_roomsByType_Price = async (req, res) => {
+  const filter = {}
+  if (req.query.type) filter.type = req.query.type
+  if (req.query.price) filter.price = req.query.price
+
+  const rooms = await Room.find(filter)
   if (!rooms) {
     return res.status(400).send("😒 Sorry We can't find any rooms");
   }
@@ -25,7 +39,9 @@ const add_room = async (req, res) => {
     deleteFile.deleteFile(unwantedImagesRoom);
     return res.status(400).send("Please choose between 4 and 8 images");
   }
-  const { error } = roomValidation.addRoomValidation(req.body);
+  const {
+    error
+  } = roomValidation.addRoomValidation(req.body);
   if (error) {
     const unwantedImagesRoom = req.files;
     deleteFile.deleteFile(unwantedImagesRoom);
@@ -36,7 +52,12 @@ const add_room = async (req, res) => {
   for (const uploadedImageFile of uploadedImageFiles) {
     images.push(uploadedImageFile.filename);
   }
-  const { type, price, hotel_name, description } = req.body;
+  const {
+    type,
+    price,
+    hotel_name,
+    description
+  } = req.body;
   const room = await Room.create({
     type,
     price,
@@ -59,7 +80,9 @@ const update_room = async (req, res) => {
     deleteFile.deleteFile(unwantedImagesRoom);
     return res.status(400).send("Please choose between 4 and 8 images");
   }
-  const { error } = roomValidation.updateRoomValidation(req.body);
+  const {
+    error
+  } = roomValidation.updateRoomValidation(req.body);
   if (error) {
     const unwantedImagesRoom = req.files;
     deleteFile.deleteFile(unwantedImagesRoom);
@@ -72,18 +95,19 @@ const update_room = async (req, res) => {
   for (const uploadedImageFile of uploadedImageFiles) {
     images.push(uploadedImageFile.filename);
   }
-  const { type, price, description } = req.body;
-  const updateRoom = await Room.updateOne(
-    {
-      _id: roomId,
-    },
-    {
-      type,
-      price,
-      description,
-      imagesRoom: images,
-    }
-  );
+  const {
+    type,
+    price,
+    description
+  } = req.body;
+  const updateRoom = await Room.updateOne({
+    _id: roomId,
+  }, {
+    type,
+    price,
+    description,
+    imagesRoom: images,
+  });
   if (updateRoom) return res.status(200).send("Room Updated Successfully!");
   res.send("Ooops Something Goes Wrong!");
 };
@@ -97,14 +121,24 @@ const removeOne_room = async (req, res) => {
 };
 
 const searchForAvailableRoomByDate = async (req, res) => {
-  const { date_one, date_two } = req.query;
+  const {
+    date_one,
+    date_two
+  } = req.query;
   const availabeRooms = {
-    alreadyAvailable: await Room.find({ availableDate: null }),
+    alreadyAvailable: await Room.find({
+      availableDate: null
+    }),
     willBeAvailable: await Room.find({
-      availableDate: { $gte: new Date(date_one), $lte: new Date(date_two) },
+      availableDate: {
+        $gte: new Date(date_one),
+        $lte: new Date(date_two)
+      },
     }),
   };
-  res.json({ message: availabeRooms });
+  res.json({
+    message: availabeRooms
+  });
 };
 
 module.exports = {
@@ -114,4 +148,5 @@ module.exports = {
   update_room,
   removeOne_room,
   searchForAvailableRoomByDate,
+  getAll_roomsByType_Price
 };

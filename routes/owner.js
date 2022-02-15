@@ -64,4 +64,6 @@ router
 router.route("/owner/:id/profile").get(ownerController.getOneOwner);
 router.route("/owner/:id/profile-update").post(ownerController.updateOneOwner);
 
+router.route('/owner/rooms').post(roomController.getAll_roomsByType_Price)
+
 module.exports = router;
