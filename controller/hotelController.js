@@ -1,5 +1,5 @@
 const Hotel = require("../model/hotel");
-
+const Room = require('../model/room')
 const hotelSchemaValidation = require("../validation/hotelInputValidation");
 
 const deleteFile = require("../utils/deleteFile");
@@ -86,4 +86,31 @@ exports.deleteOneHotel = async (req, res) => {
   let hotelImages = hotel.imagesPath;
   deleteFile.deleteExistingFile(hotelImages);
   res.status(200).send("delete hotel");
+};
+
+exports.getAllHotelsByStatus = async (req, res) => {
+  
+  const hotelList = await Hotel.find({});
+
+  let result = [];
+
+  for (let item of hotelList) {
+    room_booked = await Room.find({
+      hotel_name: item.name,
+      status: "pas disponible",
+    });
+
+    room_unbooked = await Room.find({
+      hotel_name: item.name,
+      status: "disponible",
+    });
+
+    result.push({
+      hotel_name: item.name,
+      room_booked: room_booked,
+      room_unbooked: room_unbooked,
+    });
+  }
+
+  res.json(result); 
 };
